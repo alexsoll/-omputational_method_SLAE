@@ -1,6 +1,7 @@
 import numpy as np
 from fractions import Fraction
 import copy
+from math import sqrt
 
 def subtract(x, y, coeff):
     return list(map(lambda a,b: a - coeff * b, x, y))
@@ -117,7 +118,29 @@ def LUsolution(matrix, b, L, U):
     return x
 
 
+def SeidelMethod(matrix,b, eps):
+    N = len(matrix)
+    x = []
+    count = 0
+    for i in range(N):
+        x.append(Fraction(0,1))
+    converge = False
+    while not converge:
+        count += 1
+        x_new = copy.deepcopy(x)
+        for i in range(N):
+            s1 = sum(matrix[i][j] * x_new[j] for j in range(i))
+            s2 = sum(matrix[i][j] * x[j] for j in range(i + 1, N))
+            x_new[i] = (b[i] - s1 - s2) / matrix[i][i]           
+        converge = sqrt(sum((x_new[i] - x[i])**2 for i in range(N))) <= eps
+        x = x_new
+    for i in range(N):
+        x[i] = round(x[i].numerator / x[i].denominator , len(str(eps.denominator)))
+    print(count)
+    return x
 
+    
+    
 
 
 x = np.zeros(3)      
@@ -139,10 +162,10 @@ U = [[Fraction(0,1),Fraction(0,1),Fraction(0,1)],
      [Fraction(0,1),Fraction(0,1),Fraction(0,1)]]
 
 
-matrix = [[Fraction(2,1),Fraction(4,1),Fraction(5,1)],
-          [Fraction(3,1),Fraction(-1,1),Fraction(2,1)],
-          [Fraction(-4,1),Fraction(1,1),Fraction(1,1)]]
-b1 = [Fraction(11,1),Fraction(4,1),Fraction(-2,1)]
+matrix = [[Fraction(10,1),Fraction(1,1),Fraction(1,1)],
+          [Fraction(2,1),Fraction(10,1),Fraction(1,1)],
+          [Fraction(2,1),Fraction(2,1),Fraction(10,1)]]
+b1 = [Fraction(12,1),Fraction(13,1),Fraction(14,1)]
 x1 = [Fraction(0,1),Fraction(0,1),Fraction(0,1)]
 
 res = Gauss(matrix, b1, x1)
@@ -162,7 +185,8 @@ print(U)
 print('\n'+"LU solution")
 print(x)
 
-print('\n'+"LU solution")
-print(x2)
+x = SeidelMethod(matrix, b1, Fraction(1,100))
+print('\n' + "Soidel solution")
+print(x)
 
 #print(Determinant(matrix))
