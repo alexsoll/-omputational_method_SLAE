@@ -121,12 +121,10 @@ def LUsolution(matrix, b, L, U):
 def SeidelMethod(matrix,b, eps):
     N = len(matrix)
     x = []
-    count = 0
     for i in range(N):
         x.append(Fraction(0,1))
     converge = False
     while not converge:
-        count += 1
         x_new = copy.deepcopy(x)
         for i in range(N):
             s1 = sum(matrix[i][j] * x_new[j] for j in range(i))
@@ -136,14 +134,35 @@ def SeidelMethod(matrix,b, eps):
         x = x_new
     for i in range(N):
         x[i] = round(x[i].numerator / x[i].denominator , len(str(eps.denominator)))
-    print(count)
     return x
 
+
+def simpleMethod(matrix, b, eps):
+        prev_x = []
+        N = len(matrix)
+        for i in range(N):
+            prev_x.append(Fraction(0,1))
+        while(True):
+            curr_x = []
+            for i in range(N):
+                curr_x.append(b[i])
+                for j in range(N):
+                    if i != j:
+                        curr_x[i] -= matrix[i][j] * prev_x[j]
+                curr_x[i] /= matrix[i][i]
+            error = Fraction(0,1)
+            for i in range(N):
+                error += abs(curr_x[i] - prev_x[i])
+            if error < eps:
+                break
+            prev_x = curr_x
+        return prev_x
+            
     
     
 
 
-x = np.zeros(3)      
+'''x = np.zeros(3)      
 lst = np.array([[2,4,5],
        [3,-1,2],    
        [-4,1,1]], dtype='f')
@@ -151,7 +170,7 @@ b = np.array([11,4,-2], dtype='f')
 GAUSS(lst, b, x)
 print(lst)
 print(b)
-print(x)
+print(x)'''
 
 L = [[Fraction(0,1),Fraction(0,1),Fraction(0,1)],
      [Fraction(0,1),Fraction(0,1),Fraction(0,1)],
@@ -168,19 +187,21 @@ matrix = [[Fraction(10,1),Fraction(1,1),Fraction(1,1)],
 b1 = [Fraction(12,1),Fraction(13,1),Fraction(14,1)]
 x1 = [Fraction(0,1),Fraction(0,1),Fraction(0,1)]
 
-res = Gauss(matrix, b1, x1)
-res1 = Kramer(matrix, b1, x1)
 x = []
-x = LUsolution(matrix, b1, L, U)
 
-
+res = Gauss(matrix, b1, x1)
 print("Gauss method")
 print(res)
+
+res1 = Kramer(matrix, b1, x1)
 print('\n' + "Kramer method")
 print(res1)
-print(matrix)
-print('\n' + "LU matrix")
+#print(matrix)
+
+x = LUsolution(matrix, b1, L, U)
+print('\n' + "L matrix")
 print(L)
+print('\n' + "U matrix")
 print(U)
 print('\n'+"LU solution")
 print(x)
@@ -189,4 +210,7 @@ x = SeidelMethod(matrix, b1, Fraction(1,100))
 print('\n' + "Soidel solution")
 print(x)
 
+x = simpleMethod(matrix, b1, Fraction(1,100))
+print('\n' + "Simple Method")
+print(x)
 #print(Determinant(matrix))
