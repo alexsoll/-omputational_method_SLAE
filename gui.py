@@ -16,7 +16,16 @@ class slae_gui:
         self.sizeMatrix.grid(row = 0, column = 0)
         self.matrix = []
         self.b = []
+        self.labels_time = []
+        self.size = 0
+
     def set_size_of_matrix(self, master, s = None):
+        self.size = int(self.ent.get())
+        if (self.size > 8 or self.size < 3):
+                messagebox.showinfo("Warning", "You have entered too much value.")
+                return
+        if len(self.labels_time) != 0:
+            self.labels_time.clear()
         self.l = []
         self.vecB = []
         if s == None:
@@ -45,19 +54,37 @@ class slae_gui:
         self.matrixOK.place(x = 125 ,y = (self.size  + 2)* int(self.ent.winfo_height()) + 3)
 
     def Run(self,master):
+        time_methods = []
         if len(self.matrix) == 0:
-            b = []
+            self.b = []
             for i, line in enumerate(self.l):
                 s = []
-                b.append(self.vecB[i].get())
+                self.b.append(self.vecB[i].get())
                 for j, val in enumerate(line):
                     s.append(val.get())
-                matrix.append(s)
-            SLAE.main(matrix, b)
+                self.matrix.append(s)
+            time_methods = SLAE.main(self.matrix, self.b)
         else:
-            SLAE.main(self.matrix, self.b)
+            time_methods = SLAE.main(self.matrix, self.b)
+        label_gauss = Label(master, text = ("Gauss time = " + str(time_methods[0]) + ' seconds'))
+        label_gauss.place(x = 125 ,y = (self.size  + 3)* int(self.ent.winfo_height()) + 10)
+        label_kramer = Label(master, text = ("Kramer time = " + str(time_methods[1]) + ' seconds'))
+        label_kramer.place(x = 125 ,y = (self.size  + 4)* int(self.ent.winfo_height()) + 10)
+        label_lu = Label(master, text = ("LU methods time = " + str(time_methods[2]) + ' seconds'))
+        label_lu.place(x = 125 ,y = (self.size  + 5)* int(self.ent.winfo_height()) + 10)
+        label_seidel = Label(master, text = ("Seidel time = " + str(time_methods[3]) + ' seconds'))
+        label_seidel.place(x = 125 ,y = (self.size  + 6)* int(self.ent.winfo_height()) + 10)
+        label_simple = Label(master, text = ("Simple iterations time = " + str(time_methods[4]) + ' seconds'))
+        label_simple.place(x = 125 ,y = (self.size  + 7)* int(self.ent.winfo_height()) + 10)
+        self.labels_time.extend([label_gauss, label_kramer, label_lu, label_seidel, label_simple])
+        
 
     def ReadMatrix(self,master):
+        if len(self.labels_time) != 0:
+            self.labels_time.clear()
+        if len(self.matrix) != 0 and len(self.b) !=0 and self.last_action == "set matrix":
+            self.b.clear()
+            self.matrix.clear()
         filename = askopenfilename()
         file = open(filename, "r")
         lines = file.read().splitlines()
@@ -69,6 +96,8 @@ class slae_gui:
             self.b.append(tmp[1])
             self.matrix.append(line)
         N = len(self.matrix)
+        self.size = N
+        self.ent.insert(0, str(self.size))
         self.set_size_of_matrix(master,N)
         for i, line in enumerate(self.matrix):
             self.vecB[i].insert(0, self.b[i])

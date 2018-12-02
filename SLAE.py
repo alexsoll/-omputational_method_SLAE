@@ -3,6 +3,7 @@ from fractions import Fraction
 import copy
 from math import sqrt
 import time
+import random
 
 def subtract(x, y, coeff):
     return list(map(lambda a,b: a - coeff * b, x, y))
@@ -13,7 +14,7 @@ def subtract(x, y, coeff):
 def GAUSS(matrix, b, x):
     N = len(b)
     for i, mtrxstr in enumerate(matrix):
-        for j,val in enumerate(matrix[i+1:]):
+        for j,val in enumerate(matrix[i+1]):
             coeff = float(mtrxstr[i] / val[i])
             b[i+j+1] = b[i+j+1] * coeff - b[i]
             newstr = coeff * val - mtrxstr
@@ -25,7 +26,6 @@ def GAUSS(matrix, b, x):
         x[N-i-1] = (b[N-i-1] - sum) / val[N-i-1]
 
     return x
-
 
 def Determinant(matrix):
     N = len(matrix)
@@ -72,6 +72,7 @@ def Kramer(matrix, b , x):
         for j in range(N):
             new_matrix[j][i] = b[j]
         x[i] = Determinant(new_matrix) / Determinant(matr)
+       #x[i] = np.linalg.det(new_matrix) / np.linalg.det(matr)
     Kramer_time = time.time() - start_time
     return x, Kramer_time
 
@@ -189,9 +190,21 @@ def check_matrix(matrix):
         if abs(line[i]) < (s - abs(line[i])): 
             return False 
     return True
+
+def test_matrix(N):
+    matrix = []
+    b = []
+    for i in range(N):
+        line = []
+        b.append(Fraction(random.randint(1,5)))
+        for j in range(N):
+            line.append(Fraction(random.randint(1,5)))
+        matrix.append(line)
+    return matrix, b
             
     
 def main(matrix, b):
+#def main():
     for i, line in enumerate(matrix):
         b[i] = Fraction(float(b[i]))
         for j, val in enumerate(line):
@@ -200,6 +213,7 @@ def main(matrix, b):
     x = []
     L = []
     U = []
+    time_methods = []
     N = len(matrix)
     for i in range(N):
         x.append(Fraction(0,1))
@@ -212,10 +226,13 @@ def main(matrix, b):
     res, gauss_time = Gauss(matrix, b, x)
     print("Gauss method-------" + str(gauss_time))
     print(res)
+    time_methods.append(gauss_time)
 
     res, kramer_time = Kramer(matrix, b, x)
     print('\n' + "Kramer method------" + str(kramer_time))
     print(res)
+    time_methods.append(kramer_time)
+
 
     x, lu_time = LUsolution(matrix, b, L, U)
     print('\n' + "L matrix")
@@ -224,11 +241,53 @@ def main(matrix, b):
     print(U)
     print('\n'+"LU solution--------" + str(lu_time))
     print(x)
+    time_methods.append(lu_time)
 
     x, seidel_time = SeidelMethod(matrix, b, Fraction(1,100))
     print('\n' + "Seidel solution------" + str(seidel_time))
     print(x)
+    time_methods.append(seidel_time)
 
     x, simple_time = simpleMethod(matrix, b, Fraction(1,100))
     print('\n' + "Simple Method-------" + str(simple_time))
     print(x)
+    time_methods.append(simple_time)
+    return time_methods
+
+    '''N = 50
+    x = []
+    L = []
+    U = []
+    for i in range(N):
+        x.append(Fraction(0,1))
+    for i in range(N):
+        tmp = []
+        for j in range(N):
+            tmp.append( Fraction(0,1))
+        L.append(tmp)
+        U.append(tmp)
+
+    matrix, b = test_matrix(N)
+    res, gauss_time = Gauss(matrix, b, x)
+    print("Gauss method-------" + str(gauss_time))
+
+    matr = copy.deepcopy(matrix)
+    b1 = copy.deepcopy(b)
+    for i,line in enumerate(matr):
+        b1[i] = b1[i].numerator / b1[i].denominator
+        for j,val in enumerate(line):
+            matr[i][j] = val.numerator / val.denominator
+
+    res, kramer_time = Kramer(matr, b1, x)
+    print('\n' + "Kramer method------" + str(kramer_time))
+
+    x, lu_time = LUsolution(matrix, b, L, U)
+    print('\n'+"LU solution--------" + str(lu_time))
+
+    x, seidel_time = SeidelMethod(matrix, b, Fraction(1,100))
+    print('\n' + "Seidel solution------" + str(seidel_time))
+
+    x, simple_time = simpleMethod(matrix, b, Fraction(1,100))
+    print('\n' + "Simple Method-------" + str(simple_time))'''
+
+#main()
