@@ -8,24 +8,6 @@ import random
 def subtract(x, y, coeff):
     return list(map(lambda a,b: a - coeff * b, x, y))
 
-#Gauss method with numpy arrays and float values, 
-#gives not an exact result, but close to the style of Python
-
-def GAUSS(matrix, b, x):
-    N = len(b)
-    for i, mtrxstr in enumerate(matrix):
-        for j,val in enumerate(matrix[i+1]):
-            coeff = float(mtrxstr[i] / val[i])
-            b[i+j+1] = b[i+j+1] * coeff - b[i]
-            newstr = coeff * val - mtrxstr
-            matrix[i+j+1] = np.array(newstr, dtype='f')
-    for i, val in enumerate(matrix[::-1]):
-        sum = 0.
-        for j in range(N-i,N):
-            sum += val[j] * x[j]
-        x[N-i-1] = (b[N-i-1] - sum) / val[N-i-1]
-
-    return x
 
 def Determinant(matrix):
     N = len(matrix)
@@ -35,7 +17,8 @@ def Determinant(matrix):
             for k in range(j,N):
                 matrix[i][k] -= coeff * matrix[j][k]
             #matrix[i] = subtract(matrix[i],matrix[j], coeff)
-    res = Fraction(1,1)
+    #res = Fraction(1,1)
+    res = 1.0
     for i in range(N):
         res *= matrix[i][i]
     return res
@@ -56,7 +39,8 @@ def Gauss(matrix, b, x):
             #matrix[i] = subtract(matrix[i],matrix[j], coeff)           #"for k" in one string
             newb[i] = newb[i] - coeff * newb[j]
     for i in range(N-1,-1,-1):
-        sum = Fraction(0,1)
+        #sum = Fraction(0,1)
+        sum = 0.0
         for j in range(i+1,N):
             sum = sum + matr[i][j] * x[j]
         x[i] = (newb[i] - sum) / matr[i][i]   
@@ -68,11 +52,12 @@ def Kramer(matrix, b , x):
     N = len(matr)
     start_time = time.time()
     for i in range(N):
-        new_matrix = list(matr)
+        #new_matrix = list(matr)
+        new_matrix = copy.deepcopy(matr)
         for j in range(N):
             new_matrix[j][i] = b[j]
         x[i] = Determinant(new_matrix) / Determinant(matr)
-       #x[i] = np.linalg.det(new_matrix) / np.linalg.det(matr)
+        #x[i] = np.linalg.det(new_matrix) / np.linalg.det(matr)
     Kramer_time = time.time() - start_time
     return x, Kramer_time
 
@@ -86,12 +71,14 @@ def LU(matrix, L, U):
     for i in range(1, N):
         for j in range(1, N):
             if i >= j:
-                sum = Fraction(0,1)
+                #sum = Fraction(0,1)
+                sum = 0.0
                 for k in range(j):
                     sum += L[i][k] * U[k][j]
                 L[i][j] = matrix[i][j] - sum
             else:
-                sum = Fraction(0,1)
+                #sum = Fraction(0,1)
+                sum = 0.0
                 for k in range(i):
                     sum += L[i][k] * U[k][j]
                 U[i][j] = (matrix[i][j] - sum) / L[i][i]
@@ -134,7 +121,8 @@ def SeidelMethod(matrix,b, eps):
     x = []
     start_time = time.time()
     for i in range(N):
-        x.append(Fraction(0,1))
+        #x.append(Fraction(0,1))
+        x.append(0.0)
     converge = False
     while not converge:
         x_new = copy.deepcopy(x)
@@ -143,14 +131,15 @@ def SeidelMethod(matrix,b, eps):
             s2 = sum(matrix[i][j] * x[j] for j in range(i + 1, N))
             x_new[i] = (b[i] - s1 - s2) / matrix[i][i]           
         #converge = sqrt(sum((x_new[i] - x[i])**2 for i in range(N))) <= eps
-        error = Fraction(0,1)
+        #error = Fraction(0,1)
+        error = 0.0
         for i in range(N):
                 error += abs(x_new[i] - x[i])
         if error < eps:
             converge = True
         x = x_new
-    #for i in range(N):
-    #    x[i] = round(x[i].numerator / x[i].denominator , len(str(eps.denominator)))
+    for i in range(N):
+        x[i] = round(x[i], len(str(eps))-2)
     Seidel_time = time.time() - start_time
     return x, Seidel_time
 
@@ -163,7 +152,8 @@ def simpleMethod(matrix, b, eps):
     prev_x = []
     N = len(matrix)
     for i in range(N):
-        prev_x.append(Fraction(0,1))
+        #prev_x.append(Fraction(0,1))
+        prev_x.append(0.0)
     while(True):
         curr_x = []
         for i in range(N):
@@ -172,7 +162,8 @@ def simpleMethod(matrix, b, eps):
                 if i != j:
                     curr_x[i] -= matrix[i][j] * prev_x[j]
             curr_x[i] /= matrix[i][i]
-        error = Fraction(0,1)
+        #error = Fraction(0,1)
+        error = 0.0
         for i in range(N):
             error += abs(curr_x[i] - prev_x[i])
         if error < eps:
@@ -183,7 +174,8 @@ def simpleMethod(matrix, b, eps):
 
 def check_matrix(matrix): 
     for i, line in enumerate(matrix): 
-        s = Fraction(0,1)
+        #s = Fraction(0,1)
+        s = 0.0
         for j, elem in enumerate(line):
             if i != j:
                 s += abs(line[j])
@@ -196,19 +188,26 @@ def test_matrix(N):
     b = []
     for i in range(N):
         line = []
-        b.append(Fraction(random.randint(1,5)))
+        #b.append(Fraction(random.randint(1,20)))
+        b.append(random.randint(1,20))
         for j in range(N):
-            line.append(Fraction(random.randint(1,5)))
+            if i != j:
+                #line.append(Fraction(random.randint(1,20)))
+                line.append(random.randint(1,20))
+            else:
+                #line.append(Fraction(N * 20 + random.randint(10,30)))
+                line.append(N * 20 + random.randint(10,30))
         matrix.append(line)
     return matrix, b
             
     
 def main(matrix, b):
-#def main():
     for i, line in enumerate(matrix):
-        b[i] = Fraction(float(b[i]))
+        #b[i] = Fraction(float(b[i]))
+        b[i] = float(b[i])
         for j, val in enumerate(line):
-            matrix[i][j] = Fraction(float(val))
+            #matrix[i][j] = Fraction(float(val))
+            matrix[i][j] = float(val)
     res = []
     x = []
     L = []
@@ -216,78 +215,84 @@ def main(matrix, b):
     time_methods = []
     N = len(matrix)
     for i in range(N):
-        x.append(Fraction(0,1))
+        #x.append(Fraction(0,1))
+        x.append(0.0)
         temp = []
         for j in range(N):
-            temp.append(Fraction(0,1))
+            #temp.append(Fraction(0,1))
+            temp.append(0.0)
         L.append(temp)
         U.append(temp)
+    
+    avg_gauss_time = 0; avg_kramer_time = 0; avg_lu_time = 0;
+    avg_seidel_time = 0; avg_simple_time = 0;
+    for i in range(100):
+        #N = 10
+        #x = []
+        #L = []
+        #U = []
+        #for i in range(N):
+            #x.append(Fraction(0,1))
+        #    x.append(0.0)
+        #for i in range(N):
+        #    tmp = []
+        #    for j in range(N):
+        #        #tmp.append( Fraction(0,1))
+        #        tmp.append(0.0)
+        #    L.append(tmp)
+        #    U.append(tmp)
 
-    res, gauss_time = Gauss(matrix, b, x)
-    print("Gauss method-------" + str(gauss_time))
-    print(res)
-    time_methods.append(gauss_time)
+        #matrix, b = test_matrix(N)
+        res, gauss_time = Gauss (matrix, b, x)
+        avg_gauss_time += gauss_time
+        #print("Gauss method-------" + str(gauss_time))
 
-    res, kramer_time = Kramer(matrix, b, x)
-    print('\n' + "Kramer method------" + str(kramer_time))
-    print(res)
-    time_methods.append(kramer_time)
+        #matr = copy.deepcopy(matrix)
+        #b1 = copy.deepcopy(b)
+        #for i,line in enumerate(matr):
+        #    b1[i] = b1[i].numerator / b1[i].denominator
+        #    for j,val in enumerate(line):
+        #        matr[i][j] = val.numerator / val.denominator
 
+        res, kramer_time = Kramer(matrix, b, x)
+        avg_kramer_time += kramer_time
+        #print('\n' + "Kramer method------" + str(kramer_time))
 
-    x, lu_time = LUsolution(matrix, b, L, U)
-    print('\n' + "L matrix")
-    print(L)
-    print('\n' + "U matrix")
-    print(U)
-    print('\n'+"LU solution--------" + str(lu_time))
-    print(x)
-    time_methods.append(lu_time)
+        x, lu_time = LUsolution(matrix, b, L, U)
+        avg_lu_time += lu_time
+        #print('\n'+"LU solution--------" + str(lu_time))
 
-    x, seidel_time = SeidelMethod(matrix, b, Fraction(1,100))
-    print('\n' + "Seidel solution------" + str(seidel_time))
-    print(x)
-    time_methods.append(seidel_time)
+        x, seidel_time = SeidelMethod(matrix, b, 0.001)#Fraction(1,100))
+        avg_seidel_time += seidel_time
+        #print('\n' + "Seidel solution------" + str(seidel_time))
 
-    x, simple_time = simpleMethod(matrix, b, Fraction(1,100))
-    print('\n' + "Simple Method-------" + str(simple_time))
-    print(x)
-    time_methods.append(simple_time)
-    return time_methods
+        x, simple_time = simpleMethod(matrix, b, 0.001)#Fraction(1,100))
+        avg_simple_time += simple_time
+        #print('\n' + "Simple Method-------" + str(simple_time))
 
-    '''N = 50
-    x = []
-    L = []
-    U = []
-    for i in range(N):
-        x.append(Fraction(0,1))
-    for i in range(N):
-        tmp = []
-        for j in range(N):
-            tmp.append( Fraction(0,1))
-        L.append(tmp)
-        U.append(tmp)
+    print("Total Gauss method time after 100 iterations = " + str(avg_gauss_time))
+    print("Total Kramer method time after 100 iterations = " + str(avg_kramer_time))
+    print("Total LU method time after 100 iterations = " + str(avg_lu_time))
+    print("Total Seidel method time after 100 iterations = " + str(avg_seidel_time))
+    print("Total Simple method time after 100 iterations = " + str(avg_simple_time) + '\n\n')
 
-    matrix, b = test_matrix(N)
-    res, gauss_time = Gauss(matrix, b, x)
-    print("Gauss method-------" + str(gauss_time))
+    time_methods.append(avg_gauss_time)
+    time_methods.append(avg_kramer_time)
+    time_methods.append(avg_lu_time)
+    time_methods.append(avg_seidel_time)
+    time_methods.append(avg_simple_time)
 
-    matr = copy.deepcopy(matrix)
-    b1 = copy.deepcopy(b)
-    for i,line in enumerate(matr):
-        b1[i] = b1[i].numerator / b1[i].denominator
-        for j,val in enumerate(line):
-            matr[i][j] = val.numerator / val.denominator
+    print("Average Gauss method time after 100 iterations = " + str(avg_gauss_time / 100))
+    print("Average Kramer method time after 100 iterations = " + str(avg_kramer_time / 100))
+    print("Average LU method time after 100 iterations = " + str(avg_lu_time / 100))
+    print("Average Seidel method time after 100 iterations = " + str(avg_seidel_time / 100))
+    print("Average Simple method time after 100 iterations = " + str(avg_simple_time / 100))
 
-    res, kramer_time = Kramer(matr, b1, x)
-    print('\n' + "Kramer method------" + str(kramer_time))
-
-    x, lu_time = LUsolution(matrix, b, L, U)
-    print('\n'+"LU solution--------" + str(lu_time))
-
-    x, seidel_time = SeidelMethod(matrix, b, Fraction(1,100))
-    print('\n' + "Seidel solution------" + str(seidel_time))
-
-    x, simple_time = simpleMethod(matrix, b, Fraction(1,100))
-    print('\n' + "Simple Method-------" + str(simple_time))'''
-
+    for i, line in enumerate(matrix):
+        b[i] = Fraction(float(b[i]))
+        for j, val in enumerate(line):
+            matrix[i][j] = Fraction(float(val))
+    #res = GAUSS_Rational(matrix, b, x)
+    res,t = SeidelMethod(matrix, b, 0.001)
+    return time_methods, res
 #main()

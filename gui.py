@@ -18,6 +18,7 @@ class slae_gui:
         self.b = []
         self.labels_time = []
         self.size = 0
+        self.result = []
 
     def set_size_of_matrix(self, master, s = None):
         self.size = int(self.ent.get())
@@ -63,19 +64,24 @@ class slae_gui:
                 for j, val in enumerate(line):
                     s.append(val.get())
                 self.matrix.append(s)
-            time_methods = SLAE.main(self.matrix, self.b)
+            time_methods, self.result = SLAE.main(self.matrix, self.b)
         else:
-            time_methods = SLAE.main(self.matrix, self.b)
+            time_methods, self.result = SLAE.main(self.matrix, self.b)
+
+        label_result = Label(master, text = ("Result = " + str(self.result)))
+        label_result.place(x = 125, y = (self.size  + 3)* int(self.ent.winfo_height()) + 10)
+        label_info = Label(master, text = "100 tests were conducted. Below is the average time of the algorithms.")
+        label_info.place(x = 125, y = (self.size  + 4)* int(self.ent.winfo_height()) + 10)
         label_gauss = Label(master, text = ("Gauss time = " + str(time_methods[0]) + ' seconds'))
-        label_gauss.place(x = 125 ,y = (self.size  + 3)* int(self.ent.winfo_height()) + 10)
+        label_gauss.place(x = 125 ,y = (self.size  + 6)* int(self.ent.winfo_height()) + 10)
         label_kramer = Label(master, text = ("Kramer time = " + str(time_methods[1]) + ' seconds'))
-        label_kramer.place(x = 125 ,y = (self.size  + 4)* int(self.ent.winfo_height()) + 10)
+        label_kramer.place(x = 125 ,y = (self.size  + 7)* int(self.ent.winfo_height()) + 10)
         label_lu = Label(master, text = ("LU methods time = " + str(time_methods[2]) + ' seconds'))
-        label_lu.place(x = 125 ,y = (self.size  + 5)* int(self.ent.winfo_height()) + 10)
+        label_lu.place(x = 125 ,y = (self.size  + 8)* int(self.ent.winfo_height()) + 10)
         label_seidel = Label(master, text = ("Seidel time = " + str(time_methods[3]) + ' seconds'))
-        label_seidel.place(x = 125 ,y = (self.size  + 6)* int(self.ent.winfo_height()) + 10)
+        label_seidel.place(x = 125 ,y = (self.size  + 9)* int(self.ent.winfo_height()) + 10)
         label_simple = Label(master, text = ("Simple iterations time = " + str(time_methods[4]) + ' seconds'))
-        label_simple.place(x = 125 ,y = (self.size  + 7)* int(self.ent.winfo_height()) + 10)
+        label_simple.place(x = 125 ,y = (self.size  + 10)* int(self.ent.winfo_height()) + 10)
         self.labels_time.extend([label_gauss, label_kramer, label_lu, label_seidel, label_simple])
         
 
@@ -109,5 +115,5 @@ class slae_gui:
 root = Tk()
 fb = slae_gui(root)
 root.title("Сomputational_method_SLAE")
-root.geometry("500x500")
+root.geometry("550x500")
 root.mainloop()
