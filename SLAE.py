@@ -211,7 +211,7 @@ def main(matrix, b):
     res = []
     x = []
     L = []
-    U = []
+    #U = []
     time_methods = []
     N = len(matrix)
     for i in range(N):
@@ -222,8 +222,8 @@ def main(matrix, b):
             #temp.append(Fraction(0,1))
             temp.append(0.0)
         L.append(temp)
-        U.append(temp)
-    
+        #U.append(temp)
+    U = copy.deepcopy(L)    
     avg_gauss_time = 0; avg_kramer_time = 0; avg_lu_time = 0;
     avg_seidel_time = 0; avg_simple_time = 0;
     for i in range(100):
@@ -256,11 +256,15 @@ def main(matrix, b):
 
         res, kramer_time = Kramer(matrix, b, x)
         avg_kramer_time += kramer_time
+        #print(x)
         #print('\n' + "Kramer method------" + str(kramer_time))
+
+
 
         x, lu_time = LUsolution(matrix, b, L, U)
         avg_lu_time += lu_time
         #print('\n'+"LU solution--------" + str(lu_time))
+        #print(x)
 
         x, seidel_time = SeidelMethod(matrix, b, 0.001)#Fraction(1,100))
         avg_seidel_time += seidel_time
